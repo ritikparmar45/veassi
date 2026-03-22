@@ -61,11 +61,6 @@ export default function Sidebar() {
                   <Icon size={18} className={isActive ? 'text-gray-700' : 'text-gray-400'} />
                   <span className="text-sm">{item.name}</span>
                 </div>
-                {item.name === 'Assignments' && (
-                  <div className="bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                    10
-                  </div>
-                )}
               </div>
             </Link>
           );
