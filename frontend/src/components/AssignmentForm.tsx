@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { CloudUpload, Calendar, X, Plus, Mic, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -77,7 +78,13 @@ export default function AssignmentForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-[32px] p-6 lg:p-10 shadow-[0_4px_25px_rgba(0,0,0,0.03)] border border-gray-100 max-w-3xl">
+    <motion.form 
+      initial={{ opacity: 0, scale: 0.98, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      onSubmit={handleSubmit} 
+      className="bg-white rounded-[32px] p-6 lg:p-10 shadow-[0_4px_25px_rgba(0,0,0,0.03)] border border-gray-100 max-w-3xl"
+    >
       <div className="mb-8">
         <h3 className="text-xl font-bold text-gray-900 tracking-tight">Assignment Details</h3>
         <p className="text-xs text-gray-400 mt-1">Basic information about your assignment</p>
@@ -118,8 +125,16 @@ export default function AssignmentForm() {
       </div>
 
       <div className="space-y-3 mb-6">
-        {questionRows.map((row) => (
-           <div key={row.id} className="flex flex-col sm:flex-row items-center gap-3 bg-white sm:bg-transparent border border-gray-100 sm:border-none rounded-[24px] sm:rounded-none p-4 sm:p-0 shadow-sm sm:shadow-none relative">
+        <AnimatePresence>
+          {questionRows.map((row) => (
+             <motion.div 
+               key={row.id} 
+               initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+               animate={{ opacity: 1, height: 'auto', marginBottom: 12 }}
+               exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+               transition={{ duration: 0.3 }}
+               className="flex flex-col sm:flex-row items-center gap-3 bg-white sm:bg-transparent border border-gray-100 sm:border-none rounded-[24px] sm:rounded-none p-4 sm:p-0 shadow-sm sm:shadow-none relative overflow-hidden"
+             >
             
             {/* Pick question type */}
             <div className="relative flex-1 w-full bg-[#f8f9fa] rounded-full">
@@ -178,8 +193,9 @@ export default function AssignmentForm() {
                  <button type="button" onClick={() => handleUpdateRow(row.id, 'marks', row.marks + 1)} className="text-gray-400 hover:text-gray-900 font-bold px-2">+</button>
                </div>
             </div>
-          </div>
+          </motion.div>
         ))}
+        </AnimatePresence>
       </div>
 
       <button type="button" onClick={handleAddRow} className="flex items-center space-x-2 text-[11px] font-bold text-gray-900 bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-full transition w-fit mb-8 shadow-sm border border-gray-100">
@@ -239,6 +255,6 @@ export default function AssignmentForm() {
           </button>
         </div>
 
-    </form>
+    </motion.form>
   );
 }

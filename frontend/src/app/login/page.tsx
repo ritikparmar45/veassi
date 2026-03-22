@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useAuthStore } from '../../store/useAuthStore';
 import Link from 'next/link';
 import { LogIn } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -34,8 +35,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="min-h-screen bg-[#f8f9fa] flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-hidden">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="sm:mx-auto sm:w-full sm:max-w-md"
+      >
         <div className="flex justify-center mb-6">
            <div className="flex items-center space-x-2">
              <div className="w-8 h-8 bg-orange-500 rounded-md flex items-center justify-center text-white font-bold text-xl shadow-[0_4px_10px_rgba(249,115,22,0.4)]">V</div>
@@ -46,9 +52,14 @@ export default function LoginPage() {
         <p className="mt-2 text-center text-sm text-gray-500">
           Or <Link href="/signup" className="text-orange-500 font-bold hover:text-orange-400">create a new account</Link>
         </p>
-      </div>
+      </motion.div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+        className="mt-8 sm:mx-auto sm:w-full sm:max-w-md"
+      >
         <div className="bg-white py-8 px-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:rounded-3xl sm:px-10 border border-gray-100">
           <form className="space-y-6" onSubmit={handleLogin}>
             {error && <div className="p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-xl text-center">{error}</div>}
@@ -74,7 +85,7 @@ export default function LoginPage() {
             </div>
           </form>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

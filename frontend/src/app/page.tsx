@@ -6,12 +6,18 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../store/useAuthStore';
+import { motion, Variants } from 'framer-motion';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center h-[calc(100vh-120px)] text-center max-w-lg mx-auto">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="flex flex-col items-center justify-center h-[calc(100vh-120px)] text-center max-w-lg mx-auto"
+    >
       {/* Decorative Image/Icon */}
       <div className="relative mb-8 w-48 h-48 flex items-center justify-center">
         {/* Abstract background blob for decorative feel */}
@@ -64,7 +70,7 @@ function EmptyState() {
         <Plus size={18} />
         <span className="font-medium">Create Your First Assignment</span>
       </Link>
-    </div>
+    </motion.div>
   );
 }
 
@@ -109,19 +115,44 @@ export default function Dashboard() {
      return <EmptyState />;
   }
 
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  };
+
   return (
     <div className="relative min-h-full flex flex-col pb-24 md:pb-6 max-w-7xl mx-auto">
       {/* Header text and green dot */}
-      <div className="mb-6 px-1">
+      <motion.div 
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-6 px-1"
+      >
         <div className="flex items-center space-x-2">
           <div className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
           <h2 className="text-lg md:text-2xl font-bold text-gray-900 tracking-tight">Assignments</h2>
         </div>
         <p className="text-gray-400 text-xs md:text-sm mt-1">Manage and create assignments for your classes.</p>
-      </div>
+      </motion.div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 space-y-4 md:space-y-0 text-sm px-1">
+      <motion.div 
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="flex flex-col md:flex-row md:items-center justify-between mb-8 space-y-4 md:space-y-0 text-sm px-1"
+      >
         <button className="flex items-center space-x-2 text-gray-400 hover:text-gray-700 transition w-fit">
           <Filter size={16} />
           <span className="font-medium">Filter By</span>
@@ -143,12 +174,18 @@ export default function Dashboard() {
             className="w-full bg-white border border-gray-100 rounded-full py-3.5 pl-10 pr-4 focus:outline-none focus:ring-1 focus:ring-gray-200 transition text-gray-700 text-sm placeholder-gray-300"
           />
         </div>
-      </div>
+      </motion.div>
 
       {/* Grid of Assignments */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5 px-1">
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5 px-1"
+      >
         {assignments.map((assignment) => (
-          <div 
+          <motion.div 
+            variants={itemVariants}
             key={assignment._id} 
             onClick={() => router.push(`/assignment/${assignment._id}`)}
             className="bg-white rounded-[20px] md:rounded-[24px] p-5 md:p-6 shadow-[0_2px_15px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col justify-between min-h-[140px] md:min-h-[160px] cursor-pointer hover:shadow-[0_8px_25px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-0.5"
@@ -168,17 +205,22 @@ export default function Dashboard() {
                 Due : <span className="text-gray-600 ml-1 font-extrabold">{new Date(assignment.dueDate).toLocaleDateString()}</span>
               </span>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Floating Create Assignment Button at Bottom */}
-      <div className="fixed bottom-24 md:bottom-10 left-1/2 -translate-x-1/2 z-40 hidden md:flex items-center justify-center pointer-events-none">
+      <motion.div 
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3, type: 'spring' }}
+        className="fixed bottom-24 md:bottom-10 left-1/2 -translate-x-1/2 z-40 hidden md:flex items-center justify-center pointer-events-none"
+      >
         <Link href="/create" className="flex items-center space-x-2 bg-[#1c1c1c] text-white px-6 py-3.5 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.3)] hover:bg-black transition-all hover:scale-105 active:scale-95 pointer-events-auto">
           <Plus size={18} />
           <span className="font-medium text-sm">Create Assignment</span>
         </Link>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
 import { Download, RefreshCw, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -67,21 +68,41 @@ export default function PaperOutput({ assignmentId }: { assignmentId: string }) 
 
   if (status !== 'completed' && !sections) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 bg-[#4a4a4a] -m-6 rounded-tl-[40px] rounded-bl-3xl min-h-[calc(100vh-100px)]">
-        <div className="bg-[#383838] p-10 rounded-[32px] shadow-xl text-center max-w-sm">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="flex flex-col items-center justify-center py-32 bg-[#4a4a4a] -m-6 rounded-tl-[40px] rounded-bl-3xl min-h-[calc(100vh-100px)]"
+      >
+        <motion.div 
+          initial={{ scale: 0.95, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          transition={{ duration: 0.5, type: 'spring' }}
+          className="bg-[#383838] p-10 rounded-[32px] shadow-xl text-center max-w-sm"
+        >
           <RefreshCw className="w-10 h-10 text-orange-400 animate-spin mb-6 mx-auto" />
           <h2 className="text-xl font-bold mb-3 text-white">Generating Assessment...</h2>
           <p className="text-gray-300 text-sm mb-6">{message}</p>
           <div className="w-full h-1.5 bg-gray-600 rounded-full overflow-hidden">
-            <div className="h-full bg-orange-500 rounded-full animate-pulse w-2/3"></div>
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: "66%" }}
+              transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+              className="h-full bg-orange-500 rounded-full"
+            ></motion.div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="bg-[#4a4a4a] min-h-[calc(100vh-64px)] p-4 md:p-8 -m-6 md:rounded-tl-[40px] shadow-inner pb-24 md:pb-8">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="bg-[#4a4a4a] min-h-[calc(100vh-64px)] p-4 md:p-8 -m-6 md:rounded-tl-[40px] shadow-inner pb-24 md:pb-8"
+    >
        <div className="max-w-4xl mx-auto">
          
          <div className="bg-[#383838] rounded-[24px] p-6 text-white mb-6 shadow-md border border-[#555]">
@@ -166,6 +187,6 @@ export default function PaperOutput({ assignmentId }: { assignmentId: string }) 
          </div>
 
        </div>
-    </div>
+    </motion.div>
   );
 }
