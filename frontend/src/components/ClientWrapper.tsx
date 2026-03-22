@@ -1,12 +1,42 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import { useAuthStore } from '../store/useAuthStore';
+import { Loader2 } from 'lucide-react';
 
 export default function ClientWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { token } = useAuthStore();
+  const [isLoaded, setIsLoaded] = useState(false);
+
   const isAuthPage = pathname === '/login' || pathname === '/signup';
+
+  useEffect(() => {
+    // Small delay to ensure Zustand has hydrated from localStorage if applicable
+    const timer = setTimeout(() => {
+      if (!token && !isAuthPage) {
+        router.push('/login');
+      } else if (token && isAuthPage) {
+        router.push('/');
+      }
+      setIsLoaded(true);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [token, isAuthPage, router]);
+
+  // Prevent flickering while checking auth
+  if (!isLoaded && !isAuthPage) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#f8f9fa]">
+        <Loader2 className="animate-spin text-gray-400" size={32} />
+      </div>
+    );
+  }
 
   if (isAuthPage) {
     return <main className="flex-1 w-full h-screen bg-[#f8f9fa]">{children}</main>;
