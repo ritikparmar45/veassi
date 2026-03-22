@@ -2,6 +2,7 @@
 
 import { ArrowLeft, Bell, ChevronDown } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { useAuthStore } from '../store/useAuthStore';
 import { useEffect, useState } from 'react';
 
@@ -33,18 +34,18 @@ export default function Header() {
       </div>
 
       <div className="flex items-center space-x-5">
-        <button className="relative text-gray-500 hover:text-gray-800 transition">
+        <Link href="/notifications" className="relative text-gray-500 hover:text-gray-800 transition">
           <Bell size={20} />
           <span className="absolute 0 right-0 top-0 w-2 h-2 bg-orange-500 border border-white rounded-full"></span>
-        </button>
+        </Link>
 
-        <div className="flex items-center space-x-2 cursor-pointer p-1.5 bg-white rounded-full pr-4 shadow-sm">
+        <Link href="/profile" className="flex items-center space-x-2 cursor-pointer p-1.5 bg-white rounded-full pr-4 shadow-sm hover:bg-gray-50 transition">
           <div className="w-7 h-7 rounded-full bg-blue-100 overflow-hidden shrink-0">
             <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${mounted ? user?.name || 'User' : 'User'}`} alt="User" className="w-full h-full object-cover" />
           </div>
           <span className="text-sm font-medium text-gray-700 truncate max-w-[120px]">{mounted ? user?.name || 'Teacher' : 'Teacher'}</span>
           <ChevronDown size={14} className="text-gray-400 shrink-0" />
-        </div>
+        </Link>
       </div>
     </header>
   );

@@ -73,7 +73,7 @@ export default function Sidebar() {
           <Settings size={18} className="text-gray-400" />
           <span className="text-sm">Settings</span>
         </Link>
-        <div className="flex items-center p-3 bg-gray-100 rounded-xl mb-2">
+        <Link href="/profile" className="flex items-center p-3 bg-gray-100 rounded-xl mb-2 hover:bg-gray-200 transition-colors">
           <div className="w-8 h-8 rounded-full bg-orange-200 overflow-hidden mr-3 flex-shrink-0">
             <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${mounted ? user?.schoolName || 'School' : 'School'}`} alt="School" className="w-full h-full object-cover" />
           </div>
@@ -81,7 +81,7 @@ export default function Sidebar() {
             <span className="text-sm font-semibold text-gray-900 truncate">{mounted ? user?.schoolName || 'VedaAI User' : 'VedaAI User'}</span>
             <span className="text-xs text-gray-500 truncate">{mounted ? user?.name || 'Teacher' : 'Teacher'}</span>
           </div>
-        </div>
+        </Link>
 
         <button onClick={() => { logout(); router.push('/login'); }} className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-red-500 hover:bg-red-50 transition-colors">
           <LogOut size={18} />
