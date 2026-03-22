@@ -1,0 +1,12 @@
+﻿src/components/PaperOutput.tsx(4,28): error TS2307: Cannot find module 'socket.io-client' or its corresponding type declarations.
+src/components/PaperOutput.tsx(61,32): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/components/PaperOutput.tsx(66,33): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/components/PaperOutput.tsx(78,30): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/store/useAssignmentStore.ts(1,24): error TS2307: Cannot find module 'zustand' or its corresponding type declarations.
+src/store/useAssignmentStore.ts(25,60): error TS7006: Parameter 'set' implicitly has an 'any' type.
+src/store/useAssignmentStore.ts(28,14): error TS7006: Parameter 'field' implicitly has an 'any' type.
+src/store/useAssignmentStore.ts(28,21): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/store/useAssignmentStore.ts(28,36): error TS7006: Parameter 'state' implicitly has an 'any' type.
+src/store/useAssignmentStore.ts(30,24): error TS7006: Parameter 'type' implicitly has an 'any' type.
+src/store/useAssignmentStore.ts(30,38): error TS7006: Parameter 'state' implicitly has an 'any' type.
+src/store/useAssignmentStore.ts(33,59): error TS7006: Parameter 't' implicitly has an 'any' type.
