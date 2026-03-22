@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Plus, SearchX, Search, Filter, MoreVertical, Loader2, Trash2, Edit2, Calendar as CalendarIcon, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../store/useAuthStore';
@@ -83,7 +83,7 @@ export default function Dashboard() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newDueDate, setNewDueDate] = useState('');
 
-  const fetchAssignments = async () => {
+  const fetchAssignments = useCallback(async () => {
     try {
       const res = await axios.get(`${API_URL}/assignment`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -98,7 +98,7 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, router]);
 
   useEffect(() => {
     if (!token) {
@@ -106,7 +106,7 @@ export default function Dashboard() {
       return;
     }
     fetchAssignments();
-  }, [token, router]);
+  }, [token, router, fetchAssignments]);
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
