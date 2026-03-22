@@ -29,14 +29,10 @@ export const createAssignment = async (req: AuthRequest, res: Response): Promise
       fileUrl,
       userId: req.user?.userId || null
     });
+    
     const savedAssignment = await newAssignment.save();
 
-    res.status(202).json({
-      message: 'Assignment generation request received',
-      assignmentId: savedAssignment._id,
-    });
-
-    // Fire and forget (Vercel might kill this though if the response is sent, so we must await it! Wait, if we await it, Vercel times out. We MUST await it here to prevent Vercel killing it, but Vercel limits functions to 10s on hobby. Let's await it.)
+    // Generating synchronously before sending response so Vercel doesn't kill it!
     try {
       savedAssignment.status = 'processing';
       await savedAssignment.save();
@@ -56,10 +52,18 @@ export const createAssignment = async (req: AuthRequest, res: Response): Promise
 
       savedAssignment.status = 'completed';
       await savedAssignment.save();
+
+      // ONLY send response after it is fully completed
+      res.status(201).json({
+        message: 'Assignment generation completed',
+        assignmentId: savedAssignment._id,
+      });
+
     } catch (genError) {
       console.error('Generation Error in Vercel Serverless:', genError);
       savedAssignment.status = 'failed';
       await savedAssignment.save();
+      res.status(500).json({ error: 'AI Generation failed' });
     }
   } catch (error) {
     console.error('Error creating assignment:', error);

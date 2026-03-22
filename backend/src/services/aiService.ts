@@ -1,8 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-// We can use a direct fetch to OpenAI or use the openai package
-// Assuming OpenAI for simplicity, falling back to a dummy generator if no key is provided.
+// We are using Google Gemini natively via REST API
 
 interface AIGenerationParams {
   questionTypes: string[];
@@ -40,40 +39,40 @@ Return ONLY a valid JSON object matching the following structure exactly (do not
 `;
 
   try {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      console.warn("No OPENAI_API_KEY found. Generating dummy data for demonstration.");
+      console.warn("No GEMINI_API_KEY found. Generating dummy data for demonstration.");
       return generateDummyData(params);
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
+    
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
+        contents: [{
+          parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+          responseMimeType: "application/json"
+        }
       })
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API Error: ${response.statusText}`);
+      const errText = await response.text();
+      console.error("Gemini API Error:", errText);
+      throw new Error(`Gemini API Error: ${response.statusText}`);
     }
 
     const data = await response.json();
-    const content = data.choices[0].message.content.trim();
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     
     // Parse the JSON
-    // Clean potential markdown wrappers
-    let jsonStr = content;
-    if (jsonStr.startsWith('\`\`\`json')) {
-      jsonStr = jsonStr.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, '').trim();
-    }
-    
-    const parsed = JSON.parse(jsonStr);
+    const parsed = JSON.parse(content);
     return parsed.sections;
 
   } catch (error) {
