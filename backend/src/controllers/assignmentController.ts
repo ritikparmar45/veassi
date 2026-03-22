@@ -153,3 +153,48 @@ export const getAssignments = async (req: AuthRequest, res: Response): Promise<v
     res.status(500).json({ error: 'Failed to fetch assignments' });
   }
 };
+
+export const deleteAssignment = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.userId;
+
+    const assignment = await Assignment.findOne({ _id: id, userId });
+    if (!assignment) {
+      res.status(404).json({ error: 'Assignment not found or unauthorized' });
+      return;
+    }
+
+    await Assignment.deleteOne({ _id: id });
+    await GeneratedPaper.deleteOne({ assignmentId: id });
+
+    res.status(200).json({ message: 'Assignment deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting assignment:', error);
+    res.status(500).json({ error: 'Failed to delete assignment' });
+  }
+};
+
+export const updateAssignment = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.userId;
+    const updates = req.body;
+
+    const assignment = await Assignment.findOneAndUpdate(
+      { _id: id, userId },
+      { $set: updates },
+      { new: true }
+    );
+
+    if (!assignment) {
+      res.status(404).json({ error: 'Assignment not found or unauthorized' });
+      return;
+    }
+
+    res.status(200).json({ assignment });
+  } catch (error) {
+    console.error('Error updating assignment:', error);
+    res.status(500).json({ error: 'Failed to update assignment' });
+  }
+};

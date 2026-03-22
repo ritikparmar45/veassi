@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { Plus, SearchX, Search, Filter, MoreVertical, Loader2 } from 'lucide-react';
+import { Plus, SearchX, Search, Filter, MoreVertical, Loader2, Trash2, Edit2, Calendar as CalendarIcon, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../store/useAuthStore';
-import { motion, Variants } from 'framer-motion';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -79,29 +79,63 @@ export default function Dashboard() {
   const router = useRouter();
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [newDueDate, setNewDueDate] = useState('');
+
+  const fetchAssignments = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/assignment`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAssignments(res.data.assignments || []);
+    } catch (err: any) {
+      console.error(err);
+      if(err.response?.status === 401) {
+         useAuthStore.getState().logout();
+         router.push('/login');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!token) {
       router.push('/login');
       return;
     }
-    
-    axios.get(`${API_URL}/assignment`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(res => {
-      setAssignments(res.data.assignments || []);
-      setLoading(false);
-    })
-    .catch(err => {
-      console.error(err);
-      if(err.response?.status === 401) {
-         useAuthStore.getState().logout();
-         router.push('/login');
-      }
-      setLoading(false);
-    });
+    fetchAssignments();
   }, [token, router]);
+
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!window.confirm('Are you sure you want to delete this assignment?')) return;
+    
+    try {
+      await axios.delete(`${API_URL}/assignment/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAssignments(prev => prev.filter(a => a._id !== id));
+    } catch (err) {
+      console.error('Delete failed:', err);
+      alert('Failed to delete assignment');
+    }
+  };
+
+  const handleUpdateDate = async (id: string, e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await axios.patch(`${API_URL}/assignment/${id}`, { dueDate: newDueDate }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAssignments(prev => prev.map(a => a._id === id ? { ...a, dueDate: newDueDate } : a));
+      setEditingId(null);
+    } catch (err) {
+      console.error('Update failed:', err);
+      alert('Failed to update due date');
+    }
+  };
 
   if (loading) {
     return (
@@ -183,30 +217,122 @@ export default function Dashboard() {
         animate="show"
         className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5 px-1"
       >
-        {assignments.map((assignment) => (
-          <motion.div 
-            variants={itemVariants}
-            key={assignment._id} 
-            onClick={() => router.push(`/assignment/${assignment._id}`)}
-            className="bg-white rounded-[20px] md:rounded-[24px] p-5 md:p-6 shadow-[0_2px_15px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col justify-between min-h-[140px] md:min-h-[160px] cursor-pointer hover:shadow-[0_8px_25px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-0.5"
-          >
-            <div className="flex justify-between items-start">
-              <h3 className="text-[17px] md:text-[19px] font-extrabold text-[#2a2a2a] tracking-tight truncate">{assignment.instructions?.split('\\n')[0].replace('Requested breakdown: ', '') || 'Generated Paper'}</h3>
-              <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${assignment.status === 'completed' ? 'bg-green-100 text-green-700' : assignment.status === 'processing' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'}`}>
-                {assignment.status}
+        {assignments.map((assignment) => {
+          const isExpired = new Date(assignment.dueDate) < new Date() && assignment.status !== 'failed';
+          
+          return (
+            <motion.div 
+              variants={itemVariants}
+              key={assignment._id} 
+              onClick={() => router.push(`/assignment/${assignment._id}`)}
+              className={`bg-white rounded-[20px] md:rounded-[24px] p-5 md:p-6 shadow-[0_2px_15px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col justify-between min-h-[140px] md:min-h-[160px] cursor-pointer hover:shadow-[0_8px_25px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-0.5 relative group ${isExpired ? 'opacity-90' : ''}`}
+            >
+              <div className="flex justify-between items-start relative">
+                <div className="flex-1 mr-4">
+                  <h3 className="text-[17px] md:text-[19px] font-extrabold text-[#2a2a2a] tracking-tight truncate">
+                    {assignment.instructions?.split('\\n')[0].replace('Requested breakdown: ', '') || 'Generated Paper'}
+                  </h3>
+                  <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase w-fit mt-1 ${assignment.status === 'completed' ? 'bg-green-100 text-green-700' : assignment.status === 'processing' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'}`}>
+                    {assignment.status}
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-end">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMenuOpenId(menuOpenId === assignment._id ? null : assignment._id);
+                    }}
+                    className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400 group-hover:text-gray-600"
+                  >
+                    <MoreVertical size={18} />
+                  </button>
+
+                  <AnimatePresence>
+                    {menuOpenId === assignment._id && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                        className="absolute right-0 mt-8 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 min-w-[120px]"
+                      >
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingId(assignment._id);
+                            setNewDueDate(assignment.dueDate.split('T')[0]);
+                            setMenuOpenId(null);
+                          }}
+                          className="flex items-center space-x-2 w-full px-4 py-2 hover:bg-gray-50 text-gray-600 text-sm font-medium transition-colors"
+                        >
+                          <Edit2 size={14} />
+                          <span>Edit Date</span>
+                        </button>
+                        <button 
+                          onClick={(e) => handleDelete(assignment._id, e)}
+                          className="flex items-center space-x-2 w-full px-4 py-2 hover:bg-red-50 text-red-500 text-sm font-medium transition-colors border-t border-gray-50"
+                        >
+                          <Trash2 size={14} />
+                          <span>Delete</span>
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
+              
+              <div className="flex items-center text-[10px] md:text-xs font-bold uppercase tracking-wide mt-8">
+                <span className="text-gray-400 mr-4">
+                  Created : <span className="text-gray-600 ml-1 font-extrabold">{new Date(assignment.createdAt).toLocaleDateString()}</span>
+                </span>
+                <span className={isExpired ? 'text-red-400' : 'text-gray-400'}>
+                  Due : <span className={`${isExpired ? 'text-red-500' : 'text-gray-600'} ml-1 font-extrabold`}>
+                    {new Date(assignment.dueDate).toLocaleDateString()}
+                    {isExpired && " (EXPIRED)"}
+                  </span>
+                </span>
+              </div>
+            </motion.div>
+          );
+        })}
+
+        <AnimatePresence>
+          {editingId && (
+            <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white rounded-3xl p-8 shadow-2xl w-full max-w-md border border-gray-100"
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-bold text-gray-900">Edit Due Date</h3>
+                  <button onClick={() => setEditingId(null)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+                </div>
+                <form onSubmit={(e) => handleUpdateDate(editingId, e)}>
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <input 
+                        type="date" 
+                        value={newDueDate}
+                        onChange={(e) => setNewDueDate(e.target.value)}
+                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-3.5 px-4 text-sm focus:ring-2 focus:ring-gray-200 outline-none font-semibold text-gray-700 uppercase"
+                        required
+                      />
+                      <CalendarIcon size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    </div>
+                    <button 
+                      type="submit"
+                      className="w-full bg-[#1c1c1c] text-white py-3.5 rounded-full font-bold hover:bg-black transition-all shadow-lg active:scale-95"
+                    >
+                      Update Assignment
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
             </div>
-            
-            <div className="flex items-center text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wide mt-8">
-              <span className="mr-4">
-                Created : <span className="text-gray-600 ml-1 font-extrabold">{new Date(assignment.createdAt).toLocaleDateString()}</span>
-              </span>
-              <span>
-                Due : <span className="text-gray-600 ml-1 font-extrabold">{new Date(assignment.dueDate).toLocaleDateString()}</span>
-              </span>
-            </div>
-          </motion.div>
-        ))}
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Floating Create Assignment Button at Bottom */}
