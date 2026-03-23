@@ -2,39 +2,31 @@
 
 An AI-powered assessment creator designed for educators. Teachers can seamlessly create assignments, specify question types, and let AI automatically generate a well-structured question paper with varying difficulty levels and structured marking.
 
-## Architecture Overview
+ARCHITECTURE
 
-**Frontend:**
-- **Framework:** Next.js 14 (App Router) + TypeScript
-- **State Management:** Zustand
-- **Styling:** Tailwind CSS (Matching the exact provided Figma designs)
-- **Real-time:** Socket.io-client for listening to background generation jobs
+- **Frontend:** Next.js 14, TypeScript, Zustand, Tailwind CSS, Framer Motion.
+- **Backend:** Node.js, Express, MongoDB (Mongoose), BullMQ, Redis.
+- **AI & Services:** Google Gemini API, Nodemailer (OTP Recovery), Socket.io.
+- **Security:** JWT Auth with owner-only access middleware.
 
-**Backend:**
-- **Framework:** Node.js + Express (TypeScript)
-- **Database:** MongoDB (Mongoose) to store Assignment configurations and the Final Generated Papers.
-- **Job Queue:** BullMQ + Redis (Upstash) to offload the heavy AI generation to background workers seamlessly.
-- **Real-time:** Socket.io server to broadcast `job-progress`, `job-completed`, and `job-failed` events to the connected frontend client.
-- **AI Integration:** Google Gemini APIs (via `@google/genai`) strictly prompted to return structured JSON without markdown wrappers for robust parsing.
+HOW IT WORKS
 
-## Approach & Flow
+1. **Dashboard:** Users land on `/` and log in to access the `/dashboard`.
+2. **Creation:** Teachers create assignments with a Subject and Class name.
+3. **Generation:** Backend uses Gemini AI to generate structured question papers in the background.
+4. **Security:** Users can only access assignments they created.
+5. **Recovery:** Secure email-based OTP system for password reset.
+6. **Output:** Final papers are optimized for A4 PDF printing.
 
-1. **User Input:** The teacher submits assignment details (Due Date, Question Types, Counts, and Marks) via the Next.js frontend.
-2. **API & Queue:** The backend Express server receives the payload, saves an `Assignment` document (status: `processing`), and adds a job to the BullMQ Redis queue.
-3. **Background Worker:** A dedicated BullMQ worker picks up the job, constructs a highly detailed prompt enforcing JSON output representing `Sections` and `Questions`, and calls the Gemini LLM.
-4. **WebSocket Updates:** During this process, the backend blasts progress updates through Socket.io directly to the user's browser, replacing the traditional loading spinner with real-time feedback.
-5. **Completion & Rendering:** Once the LLM responds, the worker parses the JSON, stores it as a `GeneratedPaper` in MongoDB, updates the assignment status, and notifies the client.
-6. **Output Dashboard:** The frontend consumes the structured data and renders a beautiful, A4-styled print-ready Question Paper inspired by the Figma designs, complete with Student Info, Instructions, and Difficulty Badges.
+SETUP INSTRUCTIONS
 
-## Setup Instructions
-
-### Prerequisites
+Prerequisites
 - Node.js (v18+)
 - MongoDB connection string (Local or Atlas)
 - Redis connection URL (Upstash recommended)
 - Gemini / OpenAI API Key
 
-### Backend Setup
+Backend Setup
 1. Navigate to the backend directory:
    ```bash
    cd backend
@@ -57,7 +49,7 @@ An AI-powered assessment creator designed for educators. Teachers can seamlessly
    npm run dev
    ```
 
-### Frontend Setup
+Frontend Setup
 1. Navigate to the frontend directory:
    ```bash
    cd frontend
@@ -78,8 +70,12 @@ An AI-powered assessment creator designed for educators. Teachers can seamlessly
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Bonus Features Implemented
-- **Beautiful Figma Implementation:** Recreated the UI with intense attention to detail including the floating navigation components and empty states.
-- **PDF Export Compatibility:** The Output page leverages `window.print()` with hidden UI elements to flawlessly preserve native vector fonts and CSS styling for pixel-perfect PDF rendering (superior to basic HTML2Canvas screenshots).
-- **Regenerate Logic:** Built-in endpoint to re-trigger the BullMQ worker if the AI output wasn't satisfactory.
-- **Difficulty Tagging:** Fully structured difficulty tracking within the LLM constraints.
+FEATURES
+- **Beautiful Figma Implementation:** Recreated the UI with intense attention to detail including floating navigation and professional empty states.
+- **Forgot Password (OTP):** Secure account recovery via 6-digit email OTP using Nodemailer.
+- **Ownership Security:** Middleware-level protection preventing unauthorized users from accessing other teachers' data.
+- **Assignment Customization:** Teachers can now specify custom **Subject** and **Class** names directly in the creation form for a personalized paper header.
+- **PDF Export Compatibility:** Flawless pixel-perfect PDF rendering using CSS print-media queries.
+- **Regenerate Logic:** Built-in endpoint to re-trigger the BullMQ worker for updated AI output.
+- **Difficulty Tagging:** Structured tracking of Easy, Moderate, and Challenging questions.
+
