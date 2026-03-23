@@ -112,7 +112,7 @@ export default function AssignmentForm() {
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="e.g. Mathematics, Science..."
-            className="w-full bg-[#f8f9fa] border-2 border-gray-100 rounded-2xl py-3 px-4 text-[13px] font-bold focus:ring-4 focus:ring-gray-100 outline-none"
+            className="w-full bg-[#f8f9fa] border-2 border-gray-100 rounded-2xl py-3 px-4 text-[13px] font-bold text-gray-900 focus:ring-4 focus:ring-gray-100 outline-none placeholder-gray-400"
           />
         </div>
         <div className="pl-1">
@@ -123,7 +123,7 @@ export default function AssignmentForm() {
             value={className}
             onChange={(e) => setClassName(e.target.value)}
             placeholder="e.g. 5th Grade, Class 10th..."
-            className="w-full bg-[#f8f9fa] border-2 border-gray-100 rounded-2xl py-3 px-4 text-[13px] font-bold focus:ring-4 focus:ring-gray-100 outline-none"
+            className="w-full bg-[#f8f9fa] border-2 border-gray-100 rounded-2xl py-3 px-4 text-[13px] font-bold text-gray-900 focus:ring-4 focus:ring-gray-100 outline-none placeholder-gray-400"
           />
         </div>
       </div>
