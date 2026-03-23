@@ -17,9 +17,9 @@ export default function Sidebar() {
   }, []);
 
   const navItems = [
-    { name: 'Home', href: '/', icon: LayoutGrid },
+    { name: 'Home', href: '/dashboard', icon: LayoutGrid },
     { name: 'My Groups', href: '/groups', icon: Users },
-    { name: 'Assignments', href: '/', icon: FileText, activeOverride: true }, // For demo, highlighting Assignments
+    { name: 'Assignments', href: '/dashboard', icon: FileText, activeOverride: true }, // For demo, highlighting Assignments
     { name: "AI Teacher's Toolkit", href: '/toolkit', icon: Wrench },
     { name: 'My Library', href: '/library', icon: Library },
   ];
@@ -28,12 +28,12 @@ export default function Sidebar() {
     <>
     <aside className="w-64 h-screen bg-white hidden md:flex flex-col border-r border-gray-200 fixed left-0 top-0">
       {/* Logo */}
-      <div className="p-6 flex items-center space-x-3">
+      <Link href="/dashboard" className="p-6 flex items-center space-x-3 hover:opacity-80 transition cursor-pointer">
         <div className="w-8 h-8 rounded bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-bold text-lg">
           V
         </div>
         <span className="text-xl font-bold text-gray-900">VedaAI</span>
-      </div>
+      </Link>
 
       {/* Action Button */}
       <div className="px-5 mb-8">
@@ -99,11 +99,11 @@ export default function Sidebar() {
 
     {/* Mobile Bottom Navigation */}
     <nav className="md:hidden fixed bottom-4 left-4 right-4 bg-[#1c1c1c] text-gray-400 rounded-2xl flex justify-between items-center px-6 py-3.5 z-50 shadow-2xl">
-      <Link href="/" className="flex flex-col items-center space-y-1 hover:text-white transition">
+      <Link href="/dashboard" className="flex flex-col items-center space-y-1 hover:text-white transition">
         <LayoutGrid size={20} />
         <span className="text-[10px] font-medium">Home</span>
       </Link>
-      <Link href="/" className="flex flex-col items-center space-y-1 text-white relative">
+      <Link href="/dashboard" className="flex flex-col items-center space-y-1 text-white relative">
         <div className="absolute -top-3.5 w-8 h-1 bg-white rounded-b-md"></div>
         <FileText size={20} />
         <span className="text-[10px] font-medium">Assignments</span>

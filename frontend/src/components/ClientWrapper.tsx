@@ -14,14 +14,18 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
   const [isLoaded, setIsLoaded] = useState(false);
 
   const isAuthPage = pathname === '/login' || pathname === '/signup';
+  const isLandingPage = pathname === '/';
+  const isPublicPage = isAuthPage || isLandingPage;
 
   useEffect(() => {
     // Small delay to ensure Zustand has hydrated from localStorage if applicable
     const timer = setTimeout(() => {
-      if (!token && !isAuthPage) {
+      if (!token && !isPublicPage) {
         router.push('/login');
       } else if (token && isAuthPage) {
-        router.push('/');
+        router.push('/dashboard');
+      } else if (token && isLandingPage) {
+        router.push('/dashboard');
       }
       setIsLoaded(true);
     }, 100);
@@ -38,8 +42,9 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
     );
   }
 
-  if (isAuthPage) {
-    return <main className="flex-1 w-full h-screen bg-[#f8f9fa]">{children}</main>;
+  // Public pages (Login, Signup, Landing) don't get the Sidebar/Header
+  if (isPublicPage) {
+    return <main className="flex-1 w-full min-h-screen bg-[#f8f9fa]">{children}</main>;
   }
 
   return (
