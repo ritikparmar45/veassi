@@ -6,11 +6,11 @@ import { AuthRequest } from '../middleware/auth';
 
 export const createAssignment = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { dueDate, questionTypes, numQuestions, marks, instructions, fileUrl } = req.body;
+    const { dueDate, questionTypes, numQuestions, marks, instructions, fileUrl, subject, className } = req.body;
 
     // Validate inputs
-    if (!dueDate || !questionTypes || !numQuestions || !marks || !instructions) {
-      res.status(400).json({ error: 'All fields are required.' });
+    if (!dueDate || !questionTypes || !numQuestions || !marks || !instructions || !subject || !className) {
+      res.status(400).json({ error: 'All fields are required (including Subject and Class).' });
       return;
     }
 
@@ -26,6 +26,8 @@ export const createAssignment = async (req: AuthRequest, res: Response): Promise
       numQuestions,
       marks,
       instructions,
+      subject,
+      className,
       fileUrl,
       userId: req.user?.userId || null
     });
@@ -41,7 +43,7 @@ export const createAssignment = async (req: AuthRequest, res: Response): Promise
         questionTypes,
         numQuestions,
         marks,
-        instructions
+        instructions: `Subject: ${subject}\nClass: ${className}\n${instructions}`
       });
 
       const newPaper = new GeneratedPaper({

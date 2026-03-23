@@ -6,6 +6,8 @@ export interface IAssignment extends Document {
   numQuestions: number;
   marks: number;
   instructions: string;
+  subject: string;
+  className: string;
   fileUrl?: string;
   userId?: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
@@ -17,6 +19,8 @@ const AssignmentSchema: Schema = new Schema({
   numQuestions: { type: Number, required: true },
   marks: { type: Number, required: true },
   instructions: { type: String, required: true },
+  subject: { type: String, required: true },
+  className: { type: String, required: true },
   fileUrl: { type: String },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   status: { type: String, enum: ['pending', 'processing', 'completed', 'failed'], default: 'pending' }

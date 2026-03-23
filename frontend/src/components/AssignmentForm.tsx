@@ -15,6 +15,8 @@ export default function AssignmentForm() {
   
   const [dueDate, setDueDate] = useState('');
   const [instructions, setInstructions] = useState('');
+  const [subject, setSubject] = useState('');
+  const [className, setClassName] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -59,16 +61,22 @@ export default function AssignmentForm() {
     });
     const finalInstructions = `${structureDetails}\nAdditional context: ${instructions || 'None.'}`;
 
-    setError('');
-    setLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/assignment`, {
-        dueDate, 
-        questionTypes: finalQuestionTypes, 
-        numQuestions: totalQuestions, 
-        marks: totalMarks, 
-        instructions: finalInstructions
-      }, {
+      setLoading(true);
+      setError('');
+      
+      const payload = {
+        dueDate,
+        questionTypes: finalQuestionTypes,
+        numQuestions: totalQuestions,
+        marks: totalMarks,
+        instructions: finalInstructions,
+        subject,
+        className,
+        fileUrl: selectedFile ? selectedFile.name : '' // Mock fileUrl for now
+      };
+
+      const response = await axios.post(`${API_URL}/assignment`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const assignmentId = response.data.assignmentId;
@@ -94,16 +102,42 @@ export default function AssignmentForm() {
 
       {error && <div className="p-3 mb-6 bg-red-50 text-red-600 text-sm rounded-xl">{error}</div>}
 
+      {/* New Subject and Class Inputs */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="pl-1">
+          <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wider">Subject Name</label>
+          <input 
+            type="text"
+            required
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="e.g. Mathematics, Science..."
+            className="w-full bg-[#f8f9fa] border-2 border-gray-100 rounded-2xl py-3 px-4 text-[13px] font-bold focus:ring-4 focus:ring-gray-100 outline-none"
+          />
+        </div>
+        <div className="pl-1">
+          <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wider">Class Name</label>
+          <input 
+            type="text"
+            required
+            value={className}
+            onChange={(e) => setClassName(e.target.value)}
+            placeholder="e.g. 5th Grade, Class 10th..."
+            className="w-full bg-[#f8f9fa] border-2 border-gray-100 rounded-2xl py-3 px-4 text-[13px] font-bold focus:ring-4 focus:ring-gray-100 outline-none"
+          />
+        </div>
+      </div>
+
       {/* Upload Box & Instructions Section */}
       <div className="space-y-6 mb-10">
         <div className="pl-1">
-          <label className="block text-xs font-bold text-gray-900 mb-3 uppercase tracking-wider">Assignment Brief / Details</label>
+          <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wider">Assignment Brief / Details</label>
           <textarea 
-            rows={4}
+            rows={2}
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}
-            placeholder="Type or paste the assignment questions/instructions here. AI will use this to generate your paper..."
-            className="w-full bg-[#f8f9fa] border-2 border-gray-100 rounded-[28px] py-5 px-6 text-[13px] font-medium focus:ring-4 focus:ring-gray-100 text-gray-700 outline-none resize-none placeholder-gray-400 transition-all"
+            placeholder="Additional instructions for AI..."
+            className="w-full bg-[#f8f9fa] border-2 border-gray-100 rounded-[24px] py-4 px-6 text-[13px] font-medium focus:ring-4 focus:ring-gray-100 text-gray-700 outline-none resize-none placeholder-gray-400 transition-all"
           />
         </div>
 
