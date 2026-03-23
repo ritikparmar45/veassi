@@ -29,7 +29,7 @@ export default function SignupPage() {
     try {
       const response = await axios.post(`${API_URL}/auth/register`, { name, email, password, schoolName });
       login(response.data.user, response.data.token);
-      router.push('/');
+      router.push('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Registration failed');
       setLoading(false);
