@@ -71,13 +71,14 @@ export const createAssignment = async (req: AuthRequest, res: Response): Promise
   }
 };
 
-export const getAssignmentResult = async (req: Request, res: Response): Promise<void> => {
+export const getAssignmentResult = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const userId = req.user?.userId;
 
-    const assignment = await Assignment.findById(id);
+    const assignment = await Assignment.findOne({ _id: id, userId });
     if (!assignment) {
-      res.status(404).json({ error: 'Assignment not found' });
+      res.status(404).json({ error: 'Assignment not found or unauthorized' });
       return;
     }
 
@@ -93,13 +94,14 @@ export const getAssignmentResult = async (req: Request, res: Response): Promise<
   }
 };
 
-export const regenerateAssignment = async (req: Request, res: Response): Promise<void> => {
+export const regenerateAssignment = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const userId = req.user?.userId;
 
-    const assignment = await Assignment.findById(id);
+    const assignment = await Assignment.findOne({ _id: id, userId });
     if (!assignment) {
-      res.status(404).json({ error: 'Assignment not found' });
+      res.status(404).json({ error: 'Assignment not found or unauthorized' });
       return;
     }
 

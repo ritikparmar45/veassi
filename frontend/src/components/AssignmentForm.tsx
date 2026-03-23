@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { CloudUpload, Calendar, X, Plus, Mic, ArrowRight, ArrowLeft } from 'lucide-react';
+import { CloudUpload, Calendar, X, Plus, Mic, ArrowRight, ArrowLeft, FileText } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -15,6 +15,8 @@ export default function AssignmentForm() {
   
   const [dueDate, setDueDate] = useState('');
   const [instructions, setInstructions] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [questionRows, setQuestionRows] = useState([
     { id: 1, type: 'Multiple Choice Questions', count: 4, marks: 1 },
@@ -92,16 +94,63 @@ export default function AssignmentForm() {
 
       {error && <div className="p-3 mb-6 bg-red-50 text-red-600 text-sm rounded-xl">{error}</div>}
 
-      {/* Upload Box */}
-      <div className="border-2 border-dashed border-gray-200 rounded-[24px] p-8 flex flex-col items-center justify-center text-center mb-3 hover:bg-gray-50 transition cursor-pointer">
-        <CloudUpload className="text-gray-800 mb-3" size={24} />
-        <h4 className="font-semibold text-gray-900 text-[13px]">Choose a file or drag & drop it here</h4>
-        <p className="text-[10px] text-gray-400 mt-1 mb-4">JPEG, PNG, upto 10MB</p>
-        <button type="button" className="px-5 py-2 rounded-full border border-gray-200 text-[11px] font-bold text-gray-700 hover:bg-gray-100 transition">
-          Browse Files
-        </button>
+      {/* Upload Box & Instructions Section */}
+      <div className="space-y-6 mb-10">
+        <div className="pl-1">
+          <label className="block text-xs font-bold text-gray-900 mb-3 uppercase tracking-wider">Assignment Brief / Details</label>
+          <textarea 
+            rows={4}
+            value={instructions}
+            onChange={(e) => setInstructions(e.target.value)}
+            placeholder="Type or paste the assignment questions/instructions here. AI will use this to generate your paper..."
+            className="w-full bg-[#f8f9fa] border-2 border-gray-100 rounded-[28px] py-5 px-6 text-[13px] font-medium focus:ring-4 focus:ring-gray-100 text-gray-700 outline-none resize-none placeholder-gray-400 transition-all"
+          />
+        </div>
+
+        <div 
+          onClick={() => fileInputRef.current?.click()}
+          className={`border-2 border-dashed rounded-[28px] p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer group ${selectedFile ? 'border-green-200 bg-green-50' : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'}`}
+        >
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+            className="hidden" 
+            accept="image/*,.pdf"
+          />
+          
+          {selectedFile ? (
+            <div className="flex flex-col items-center animate-in fade-in zoom-in duration-300">
+               <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-3">
+                  <FileText size={24} />
+               </div>
+               <h4 className="font-bold text-gray-900 text-sm">{selectedFile.name}</h4>
+               <p className="text-[10px] text-green-600 font-bold mt-1 uppercase">File Selected</p>
+               <button 
+                type="button" 
+                onClick={(e) => { e.stopPropagation(); setSelectedFile(null); }}
+                className="mt-4 px-4 py-1.5 rounded-full bg-white border border-red-100 text-[10px] font-bold text-red-500 hover:bg-red-50 transition"
+               >
+                 Remove File
+               </button>
+            </div>
+          ) : (
+            <>
+              <div className="w-12 h-12 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <CloudUpload size={24} />
+              </div>
+              <h4 className="font-bold text-gray-900 text-[13px]">Upload images of assignment (Optional)</h4>
+              <p className="text-[10px] text-gray-400 mt-1 mb-4 italic">JPEG, PNG, or PDF up to 10MB</p>
+              <button 
+                type="button" 
+                className="px-6 py-2.5 rounded-full bg-white border border-gray-200 text-[11px] font-bold text-gray-700 shadow-sm group-hover:bg-gray-900 group-hover:text-white group-hover:border-gray-900 transition-all"
+              >
+                Browse Files
+              </button>
+            </>
+          )}
+        </div>
       </div>
-      <p className="text-[10px] text-center text-gray-400 mb-8 max-w-[200px] mx-auto">Upload images of your preferred document/image</p>
 
       {/* Due Date */}
       <div className="mb-8 pl-1">
@@ -208,22 +257,7 @@ export default function AssignmentForm() {
         <div>Total Marks : {totalMarks}</div>
       </div>
 
-      {/* Additional Instructions */}
-      <div className="mb-12 pl-1">
-        <label className="block text-xs font-bold text-gray-900 mb-3">Additional Information (For better output)</label>
-        <div className="relative">
-          <textarea 
-            rows={4}
-            value={instructions}
-            onChange={(e) => setInstructions(e.target.value)}
-            placeholder="e.g Generate a question paper for 3 hour exam duration..."
-            className="w-full bg-[#f8f9fa] border border-gray-200 border-dashed rounded-[24px] py-4 px-5 text-[13px] font-medium focus:ring-2 focus:ring-gray-300 text-gray-700 outline-none resize-none placeholder-gray-400"
-          />
-          <button type="button" className="absolute bottom-4 right-4 p-2 bg-white rounded-full shadow-sm border border-gray-100 text-gray-500 hover:text-gray-900 transition">
-            <Mic size={16} />
-          </button>
-        </div>
-      </div>
+      {/* Additional Instructions - Removed from here as it's moved to the top */}
 
         {/* Navigation Buttons */}
         <div className="flex justify-between items-center pt-8 border-t border-gray-100">

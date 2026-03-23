@@ -237,60 +237,46 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="flex flex-col items-end">
+                <div className="flex items-center space-x-1">
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      setMenuOpenId(menuOpenId === assignment._id ? null : assignment._id);
+                      setEditingId(assignment._id);
+                      setNewDueDate(new Date(assignment.dueDate).toISOString().split('T')[0]);
                     }}
-                    className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400 group-hover:text-gray-600"
+                    className="p-2 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded-lg transition-all duration-200"
+                    title="Edit Due Date"
                   >
-                    <MoreVertical size={18} />
+                    <Edit2 size={16} />
                   </button>
-
-                  <AnimatePresence>
-                    {menuOpenId === assignment._id && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: -10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                        className="absolute right-0 mt-8 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 min-w-[120px]"
-                      >
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingId(assignment._id);
-                            setNewDueDate(assignment.dueDate.split('T')[0]);
-                            setMenuOpenId(null);
-                          }}
-                          className="flex items-center space-x-2 w-full px-4 py-2 hover:bg-gray-50 text-gray-600 text-sm font-medium transition-colors"
-                        >
-                          <Edit2 size={14} />
-                          <span>Edit Date</span>
-                        </button>
-                        <button 
-                          onClick={(e) => handleDelete(assignment._id, e)}
-                          className="flex items-center space-x-2 w-full px-4 py-2 hover:bg-red-50 text-red-500 text-sm font-medium transition-colors border-t border-gray-50"
-                        >
-                          <Trash2 size={14} />
-                          <span>Delete</span>
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <button 
+                    onClick={(e) => handleDelete(assignment._id, e)}
+                    className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded-lg transition-all duration-200"
+                    title="Delete Assignment"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               </div>
-              
-              <div className="flex items-center text-[10px] md:text-xs font-bold uppercase tracking-wide mt-8">
-                <span className="text-gray-400 mr-4">
-                  Created : <span className="text-gray-600 ml-1 font-extrabold">{new Date(assignment.createdAt).toLocaleDateString()}</span>
-                </span>
-                <span className={isExpired ? 'text-red-400' : 'text-gray-400'}>
-                  Due : <span className={`${isExpired ? 'text-red-500' : 'text-gray-600'} ml-1 font-extrabold`}>
-                    {new Date(assignment.dueDate).toLocaleDateString()}
-                    {isExpired && " (EXPIRED)"}
+
+              {/* Card Body */}
+              <div className="mt-4 flex flex-col justify-between flex-1">
+                <div className="flex items-center space-x-4 mb-4">
+                   <div className="flex items-center space-x-1.5 text-gray-500">
+                      <CalendarIcon size={13} className="text-gray-400" />
+                      <span className="text-[11px] font-bold uppercase tracking-wider">
+                        {new Date(assignment.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                   </div>
+                   {isExpired && (
+                     <span className="text-[10px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded-full uppercase">Expired</span>
+                   )}
+                </div>
+                <div className="flex items-center text-[10px] md:text-xs font-bold uppercase tracking-wide">
+                  <span className="text-gray-400 mr-4">
+                    Created : <span className="text-gray-600 ml-1 font-extrabold">{new Date(assignment.createdAt).toLocaleDateString()}</span>
                   </span>
-                </span>
+                </div>
               </div>
             </motion.div>
           );
